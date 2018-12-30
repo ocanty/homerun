@@ -7,8 +7,6 @@ with open('README.rst') as f:
 with open('LICENSE') as f:
     license = f.read()
 
-install_requires = [ ]
-
 with open('requirements.txt') as requirements:
     install_requires = requirements.readlines()
 
