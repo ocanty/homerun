@@ -13,7 +13,7 @@ with open('requirements.txt') as requirements:
 setup(
     name='homerun',
     version='0.1.0',
-    description='Cloudflare Dynamic DNS script',
+    description='Easy to use Cloudflare dynamic DNS',
     long_description=readme,
     author='Oisin Canty',
     author_email='git@ocanty.com',

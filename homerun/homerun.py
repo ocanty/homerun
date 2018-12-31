@@ -1,9 +1,9 @@
-
 import CloudFlare
 import requests
 import json
 import yaml
 import schedule
+import sys
 import time
 
 def get_current_ip(ip_server):
@@ -80,15 +80,15 @@ def homerun():
 
         for param in check_config:
             if not param in config:
-                print(f'Missing `{param}` parameter in config.yml!')
-                return
+                print(f'Missing `{param}` parameter in config.yml!',file=sys.stderr)
+                exit(1)
 
         # try to get current ip
         ip = get_current_ip(config['ip_server'])
 
         if not ip:
-            print("Could not retrieve IP, no DNS records were modified")
-            return 
+            print("Could not retrieve IP, no DNS records were modified",file=sys.stderr)
+            exit(1)
 
         # add the A record, update every x minutes as in config
         cf = CloudFlare.CloudFlare()
@@ -108,15 +108,15 @@ def homerun():
             time.sleep(60)
 
     except CloudFlare.exceptions.CloudFlareAPIError as e:
-        print(f'API error: {int(e)}, {str(e)}.')
+        print(f'API error: {int(e)}, {str(e)}.',file=sys.stderr)
+        
 
         if 'X-Auth' in str(e):
-            print(f'Did you configure your Cloudflare API key properly?')
-        return
+            print(f'Did you configure your Cloudflare API key properly?',file=sys.stderr)
+
+        exit(1)
 
     except FileNotFoundError as e:
-        print(f'Could not read config.yml! ({e})')
-        return
+        print(f'Could not read config.yml! ({e})',file=sys.stderr)
 
-if __name__ == '__main__':
-    homerun()
+        exit(1)

@@ -1,0 +1,11 @@
+[Unit]
+Description=Homerun Cloudflare Dynamic DNS daemon
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ocanty/projects/homerun/
+ExecStart=python3 homerun.py
+ExecStop=pkill -f 'python3 homerun.py'
+
+[Install]
+WantedBy=multi-user.target
