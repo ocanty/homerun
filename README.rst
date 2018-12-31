@@ -63,13 +63,11 @@ Installation
 
         [Install]
         WantedBy=multi-user.target 
-   2. Tell systemd to use the service 
+   2. Tell systemd to use the service::
 
-         ``sudo ln -s homerun.service /etc/systemd/system/homerun.service``
-
-         ``systemctl enable homerun.service``
-
-         ``systemctl start homerun.service``
+         sudo ln -s homerun.service /etc/systemd/system/homerun.service
+         systemctl enable homerun.service
+         systemctl start homerun.service
 
 To-Do
 ------------
