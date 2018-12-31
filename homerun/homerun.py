@@ -67,10 +67,23 @@ def add_subdomain_a_to_domain(cf,ip,subdomain,domain,proxy):
                 'proxied': proxy
             }))
 
-def homerun():
+def add_record_in_config(cf,config):
     """
         Adds an A record pointed to the IP retrieved at ip_server
         for the subdomain, domain, proxy status specified in config.yml
+    """
+    # try to get current ip
+    ip = get_current_ip(config['ip_server'])
+
+    if not ip:
+        print("Could not retrieve IP, no DNS records were modified")
+        return
+
+    add_subdomain_a_to_domain(cf, ip, config['subdomain'], config['domain'], config['proxy'])
+
+def homerun():
+    """
+        Main task, verifies config and starts the job
     """
     try:
         config = yaml.safe_load(open("config.yml"))
@@ -83,16 +96,10 @@ def homerun():
                 print(f'Missing `{param}` parameter in config.yml!',file=sys.stderr)
                 exit(1)
 
-        # try to get current ip
-        ip = get_current_ip(config['ip_server'])
-
-        if not ip:
-            print("Could not retrieve IP, no DNS records were modified",file=sys.stderr)
-            exit(1)
-
+        
         # add the A record, update every x minutes as in config
         cf = CloudFlare.CloudFlare()
-        job = lambda: add_subdomain_a_to_domain(cf, ip, config['subdomain'], config['domain'], config['proxy'])
+        job = lambda: add_record_in_config(cf,config)
 
         # run now
         job()
