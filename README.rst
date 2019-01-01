@@ -23,17 +23,18 @@ Installation
     proxy: false
     update_every: 10
 
-4. Specify config options as you wish:
+4. Specify config options as you wish
 
-    ``ip_server`` - A HTTP(S) service that when GET requested, returns the IP of the client (you probably won't need to change this)
+    1. ``ip_server`` - A HTTP(S) service that when GET requested, returns the IP of the client (you probably won't need to change this)
 
-    ``subdomain`` - The subdomain you want to point to your home IP
+    2. ``subdomain`` - The subdomain you want to point to your home IP
 
-    ``domain`` - A Cloudflare site that is associated with your Cloudflare account
+    3. ``domain`` - A Cloudflare site that is associated with your Cloudflare account
 
-    ``proxy`` - Should we proxy this record through Cloudflare's system? (If this is ``true`` note that Cloudflare only supports some ports based on your plan)
+    4. ``proxy`` - Should we proxy this record through Cloudflare's system? (If this is ``true`` note that Cloudflare only supports some ports based on your plan)
 
-    ``update_every`` - Check every x amount of minute for an IP change
+    5. ``update_every`` - Check every x amount of minute for an IP change
+
 5. Setup Cloudflare API keys
 
    1. `Follow Cloudflare instructions to retrieve your API key <https://support.cloudflare.com/hc/en-us/articles/200167836-Where-do-I-find-my-Cloudflare-API-key->`_.
@@ -68,7 +69,3 @@ Installation
          sudo ln -s homerun.service /etc/systemd/system/homerun.service
          systemctl enable homerun.service
          systemctl start homerun.service
-
-To-Do
-------------
-1. Automate all of the above
