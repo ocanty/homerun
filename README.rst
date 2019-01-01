@@ -19,7 +19,7 @@ Installation
      
     ip_server: https://ifconfig.co/ip
     subdomain: homerun
-    domain: ocanty.com
+    domain: example.com
     proxy: false
     update_every: 10
 

@@ -1,3 +1,4 @@
+import argparse
 import CloudFlare
 import requests
 import json
@@ -13,7 +14,7 @@ def get_current_ip(ip_server):
 
         Parameters
         ----------
-        ip_server - A HTTP(S) path that when GET requested returns the IP of the client that requested it
+        ip_server - A HTTP(S) path that when GET requested returns the IP of the requester
     """
     r = requests.get(ip_server)
 
@@ -23,7 +24,8 @@ def get_current_ip(ip_server):
         
 def add_subdomain_a_to_domain(cf,ip,subdomain,domain,proxy):
     """
-        Adds an A record for the subdomain specified to the zone pointed at domain
+        Adds an A record pointing at an ip 
+        for the subdomain specified to the zone matching the domain parameter
 
         Parameters
         ----------
@@ -40,25 +42,34 @@ def add_subdomain_a_to_domain(cf,ip,subdomain,domain,proxy):
     if len(zones) == 1:
         zone = zones[0]
 
-        # search dns records on this zone if we placed the subdomain in it before
+        # search dns records on this zone, did we previously set a record?
         records = cf.zones.dns_records.get(zone['id'],params={
             'type': 'A',
-            # weirdly, cloudflare sets the name as <subdomain>.<domain> for the GET
-            # the name is different for the POST of the same request
+            # weirdly, cloudflare saves the name as <subdomain>.<domain> i.e 'homerun.ocanty.com'
+            # rather than just 'homerun'
+            # this format used for the GET request on this entity is different than the format
+            # used for POST & PUT
+            # so we have to search like this instead
             'name': subdomain + '.' + domain 
         })
 
-        # we didnt find a previous record, lets create a new one
+        # we didnt find a current record, lets create a new one
         if(len(records) == 0):
             print(cf.zones.dns_records.post(zone['id'], data={
                 'type':'A',
-                'name':subdomain,
+                'name':subdomain, 
                 'content':ip,
                 'ttl':120,
                 'proxied': proxy
             }))
         else:
-            # update the existing one if it already existed
+            cur_record = records[0]
+            
+            # dont bother doing the update if the current record has the same IP address
+            if cur_record['content'] == ip:
+                print('IP has not changed, not updating')
+                return
+
             print(cf.zones.dns_records.put(zone['id'], records[0]['id'], data={
                 'type':'A',
                 'name':subdomain,
@@ -70,7 +81,7 @@ def add_subdomain_a_to_domain(cf,ip,subdomain,domain,proxy):
 def add_record_in_config(cf,config):
     """
         Adds an A record pointed to the IP retrieved at ip_server
-        for the subdomain, domain, proxy status specified in config.yml
+        for the subdomain, domain and proxy status specified in config
     """
     # try to get current ip
     ip = get_current_ip(config['ip_server'])
@@ -86,18 +97,31 @@ def homerun():
         Main task, verifies config and starts the job
     """
     try:
-        config = yaml.safe_load(open("config.yml"))
- 
-        # make sure each possible config option was used
-        check_config = ['ip_server','subdomain','domain','proxy','update_every']
+        # we need to verify that all the required options came from either a config file 
+        # or were passed as command line arguments
+        config = { }
+        options_present = set()
 
+        # command line parser setup
+        parser = argparse.ArgumentParser()        
+        parser.add_argument('-config', default='config.yml',nargs=1, type=str)
+        
+        args = parser.parse_args()
+        
+        try:
+            config_file = open(args.config)
+            config = yaml.safe_load(config_file)
+        except FileNotFoundError:
+            print('config.yml not found!', file=sys.stderr)
+            exit(1)
+
+        check_config = ['ip_server','subdomain','domain','proxy','update_every']
+        
         for param in check_config:
             if not param in config:
                 print(f'Missing `{param}` parameter in config.yml!',file=sys.stderr)
                 exit(1)
 
-        
-        # add the A record, update every x minutes as in config
         cf = CloudFlare.CloudFlare()
         job = lambda: add_record_in_config(cf,config)
 
@@ -111,19 +135,14 @@ def homerun():
         while True: 
             schedule.run_pending()
 
-            # process jobs in 60 sec intervals, because the minimum update time above is 1 min
+            # process jobs in 60 sec intervals, because the minimum possible update time above is 1 min
             time.sleep(60)
 
     except CloudFlare.exceptions.CloudFlareAPIError as e:
-        print(f'API error: {int(e)}, {str(e)}.',file=sys.stderr)
+        print(f'API error: {int(e)}, {str(e)}!',file=sys.stderr)
         
-
+        # If user doesn't specify an API key, the Cloudflare exception will have X-Auth in it
         if 'X-Auth' in str(e):
             print(f'Did you configure your Cloudflare API key properly?',file=sys.stderr)
-
-        exit(1)
-
-    except FileNotFoundError as e:
-        print(f'Could not read config.yml! ({e})',file=sys.stderr)
 
         exit(1)
