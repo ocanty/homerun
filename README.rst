@@ -8,6 +8,32 @@ This is useful when you want to access services hosted on your home pc/homelab w
 
 Installation
 ------------
+**Docker**
+
+1. Clone the repo::
+
+    git clone https://github.com/ocanty/homerun.git
+    cd homerun
+
+2. Build the Docker image, note the arguments::
+
+    sudo docker build . --build-arg SUBDOMAIN=homerun --build-arg DOMAIN=example.com --build-arg PROXY=false --build-arg UPDATE_EVERY=10 -t my-homerun
+
+3. Setup Cloudflare API keys
+
+   1. `Follow Cloudflare instructions to retrieve your API key <https://support.cloudflare.com/hc/en-us/articles/200167836-Where-do-I-find-my-Cloudflare-API-key->`_.
+
+4. Run the image first to test, to see if everything is working correctly::
+    
+    sudo docker run -t -e "CF_API_EMAIL=<email>" -e "CF_API_KEY=<global API key>" my-homerun
+
+5. If so, set it up to fork to the background::
+
+    sudo docker run -e "CF_API_EMAIL=<email>" -e "CF_API_KEY=<global API key>" my-homerun &
+
+6. *(optional)* If you do not want to pass Cloudflare keys as environment variables, you can follow Step 5 below, and then rebuild the image as before with *.cloudflare.cfg* in the project directory.
+   
+**Manual**
 
 1. Clone the repo::
 
@@ -25,15 +51,15 @@ Installation
 
 4. Specify config options as you wish
 
-    1. ``ip_server`` - A HTTP(S) service that when GET requested, returns the IP of the client (you probably won't need to change this)
+   1. ``ip_server`` - A HTTP(S) service that when GET requested, returns the IP of the client (you probably won't need to change this)
 
-    2. ``subdomain`` - The subdomain you want to point to your home IP
+   2. ``subdomain`` - The subdomain you want to point to your home IP
+ 
+   3. ``domain`` - A Cloudflare site that is associated with your Cloudflare account
 
-    3. ``domain`` - A Cloudflare site that is associated with your Cloudflare account
+   4. ``proxy`` - Should we proxy this record through Cloudflare's system? (If this is ``true`` note that Cloudflare only supports some ports based on your plan)
 
-    4. ``proxy`` - Should we proxy this record through Cloudflare's system? (If this is ``true`` note that Cloudflare only supports some ports based on your plan)
-
-    5. ``update_every`` - Check every x amount of minute for an IP change
+   5. ``update_every`` - Check every x amount of minute for an IP change
 
 5. Setup Cloudflare API keys
 
@@ -54,7 +80,7 @@ Installation
    1. Edit homerun.service, changing ``WorkingDirectory`` to the path you placed the repo::
 
         [Unit] 
-        Description=Homerun Cloudflare Dynamic DNS daemon
+        Description=homerun - dynamic DNS daemon for Cloudflare
 
         [Service]
         Type=simple
@@ -69,3 +95,14 @@ Installation
          sudo ln -s homerun.service /etc/systemd/system/homerun.service
          systemctl enable homerun.service
          systemctl start homerun.service
+7. Your record should be up and running at *subdomain.domain*
+
+FAQs
+----
+1. **What if I want it to point to the root?** i.e just *domain*
+
+   You should make use of `Cloudflare's CNAME flattening feature <https://blog.cloudflare.com/introducing-cname-flattening-rfc-compliant-cnames-at-a-domains-root/>`_ to alias this subdomain to the root domain. 
+
+2. **What about other subdomains?**
+
+   Just use regular CNAMEs.
