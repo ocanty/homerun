@@ -17,13 +17,13 @@ Installation
 
 2. Build the Docker image, note the arguments
 
-    * For `x86` based OS's::
+   * For `x86` based OS's::
 
-        sudo docker build . --build-arg SUBDOMAIN=homerun --build-arg DOMAIN=example.com --build-arg PROXY=false --build-arg UPDATE_EVERY=10 -t my-homerun
+       sudo docker build . --build-arg SUBDOMAIN=homerun --build-arg DOMAIN=example.com --build-arg PROXY=false --build-arg UPDATE_EVERY=10 -t my-homerun
     
-    * For `armv7` based OS's::
+   * For `armv7` based OS's::
 
-        sudo docker build -f Dockerfile.armv7 . --build-arg SUBDOMAIN=homerun --build-arg DOMAIN=example.com --build-arg PROXY=false --build-arg UPDATE_EVERY=10 -t my-homerun
+       sudo docker build -f Dockerfile.armv7 . --build-arg SUBDOMAIN=homerun --build-arg DOMAIN=example.com --build-arg PROXY=false --build-arg UPDATE_EVERY=10 -t my-homerun
 
 3. Setup Cloudflare API keys
 
