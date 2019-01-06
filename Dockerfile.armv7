@@ -2,9 +2,13 @@ FROM easypi/alpine-arm
 LABEL maintainer="git@ocanty.com"
 
 # install python as no python alpine for arm32v7
-RUN apk update \
-    apk add python python-pip
+RUN apk update && \
+    apk add python3
+ 
+RUN ln -s python python3 && \
+    ln -s pip pip3
 
+# install homerun
 COPY . /homerun
 WORKDIR /homerun
 
@@ -12,7 +16,7 @@ WORKDIR /homerun
 RUN pip3 install -r ./requirements.txt
 
 # install our template tool
-RUN pip install j2cli
+RUN pip333 install j2cli
 
 ARG IP_SERVER=https://ifconfig.co/ip
 ARG SUBDOMAIN
