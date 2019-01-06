@@ -15,9 +15,15 @@ Installation
     git clone https://github.com/ocanty/homerun.git
     cd homerun
 
-2. Build the Docker image, note the arguments::
+2. Build the Docker image, note the arguments
 
-    sudo docker build . --build-arg SUBDOMAIN=homerun --build-arg DOMAIN=example.com --build-arg PROXY=false --build-arg UPDATE_EVERY=10 -t my-homerun
+   * For `x86` based OS's::
+
+       sudo docker build . --build-arg SUBDOMAIN=homerun --build-arg DOMAIN=example.com --build-arg PROXY=false --build-arg UPDATE_EVERY=10 -t my-homerun
+    
+   * For `armv7` based OS's::
+
+       sudo docker build -f Dockerfile.armv7 . --build-arg SUBDOMAIN=homerun --build-arg DOMAIN=example.com --build-arg PROXY=false --build-arg UPDATE_EVERY=10 -t my-homerun
 
 3. Setup Cloudflare API keys
 
