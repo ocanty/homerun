@@ -16,7 +16,7 @@ WORKDIR /homerun
 RUN pip3 install -r ./requirements.txt
 
 # install our template tool
-RUN pip333 install j2cli
+RUN pip3 install j2cli
 
 ARG IP_SERVER=https://ifconfig.co/ip
 ARG SUBDOMAIN
